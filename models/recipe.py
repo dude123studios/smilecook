@@ -1,5 +1,5 @@
 from extensions import db
-
+from sqlalchemy import asc, desc
 
 class Recipe(db.Model):
     __tablename__ = 'recipe'
@@ -19,8 +19,8 @@ class Recipe(db.Model):
     cover_image = db.Column(db.String(100), default=None)
 
     @classmethod
-    def get_all_published(cls):
-        return cls.query.filter_by(is_public=True).all()
+    def get_all_published(cls, page, per_page):
+        return cls.query.filter_by(is_public=True).order_by(desc(cls.created_at)).paginate(page=page, per_page=per_page)
 
     @classmethod
     def get_by_id(cls, recipe_id):

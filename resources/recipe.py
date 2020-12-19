@@ -7,18 +7,20 @@ from flask_jwt_extended import get_jwt_identity, jwt_required, jwt_optional
 from utils import save_image
 from extensions import image_set
 import os
-from flask_uploads import extension
-
+from schemas.pagination import RecipePaginationSchema
+from webargs import fields
+from webargs.flaskparser import use_kwargs
 recipe_schema = RecipeSchema()
 recipe_list_schema = RecipeSchema(many=True)
 recipe_cover_schema = RecipeSchema(only=('cover_image',))
-
+recipe_pagination_schema = RecipePaginationSchema()
 
 class RecipeListResource(Resource):
 
-    def get(self):
-        recipes = Recipe.get_all_published()
-        return recipe_list_schema.dump(recipes).data, HTTPStatus.OK
+    @use_kwargs({'page':fields.Int(missing=1), 'per_page':fields.Int(missing=20)})
+    def get(self,page, per_page):
+        paginated_recipes = Recipe.get_all_published(page, per_page)
+        return recipe_pagination_schema.dump(paginated_recipes).data, HTTPStatus.OK
 
     @jwt_required
     def post(self):

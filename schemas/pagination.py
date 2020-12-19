@@ -1,7 +1,7 @@
 from flask import request
 from marshmallow import Schema, fields
 from urllib.parse import urlencode
-
+from schemas.recipe import RecipeSchema
 class PaginationSchema(Schema):
     class Meta:
         ordered = True
@@ -17,6 +17,7 @@ class PaginationSchema(Schema):
             query_args['page'] = page
 
             return '{}?{}'.format(request.base_url, urlencode(query_args))
+
         def get_pagination_link(self, paginated_objects):
             paginated_links = {
                 'first':self.get_url(page=1),
@@ -27,3 +28,6 @@ class PaginationSchema(Schema):
             if paginated_objects.has_next:
                 paginated_links['next'] = self.get_url(page=paginated_objects.next_num)
             return paginated_links
+
+class RecipePaginationSchema(PaginationSchema):
+    data = fields.Nested(RecipeSchema, attribute='items',many=True)

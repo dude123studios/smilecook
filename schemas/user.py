@@ -21,4 +21,4 @@ class UserSchema(Schema):
             return url_for('static', filename='images/assets/default-avatar.jpg', _external=True)
     def load_password(self,value):
         return hash_password(value)
-# a comment
+

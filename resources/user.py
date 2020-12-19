@@ -123,3 +123,4 @@ class MeResource(Resource):
         user = User(**data)
         user.save()
         return user_schema.dump(user).data, HTTPStatus.CREATED
+    
