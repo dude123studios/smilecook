@@ -19,8 +19,17 @@ class Recipe(db.Model):
     cover_image = db.Column(db.String(100), default=None)
 
     @classmethod
-    def get_all_published(cls, page, per_page):
-        return cls.query.filter_by(is_public=True).order_by(desc(cls.created_at)).paginate(page=page, per_page=per_page)
+    def get_all_published(cls, page, per_page, sort, order, q):
+        keyword = '%{keyword}%'.format(keyword=q)
+        field = getattr(cls,sort)
+        if order == 'asc':
+            sort_logic = asc(field)
+        else:
+            sort_logic = desc(field)
+
+        return cls.query.filter((cls.name.ilike(keyword),cls.description.ilike(keyword)),
+                                cls.is_public.is_(True)).\
+            order_by(sort_logic).paginate(page=page,per_page=per_page)
 
     @classmethod
     def get_by_id(cls, recipe_id):

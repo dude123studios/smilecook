@@ -10,16 +10,23 @@ import os
 from schemas.pagination import RecipePaginationSchema
 from webargs import fields
 from webargs.flaskparser import use_kwargs
+
 recipe_schema = RecipeSchema()
 recipe_list_schema = RecipeSchema(many=True)
 recipe_cover_schema = RecipeSchema(only=('cover_image',))
 recipe_pagination_schema = RecipePaginationSchema()
 
+
 class RecipeListResource(Resource):
 
-    @use_kwargs({'page':fields.Int(missing=1), 'per_page':fields.Int(missing=20)})
-    def get(self,page, per_page):
-        paginated_recipes = Recipe.get_all_published(page, per_page)
+    @use_kwargs({'q': fields.Str(missing=''), 'page': fields.Int(missing=1), 'per_page': fields.Int(missing=20),
+                 'sort': fields.Str(missing='created_at'), 'order': fields.Str(missing='desc')})
+    def get(self,q, page, per_page, sort, order):
+        if sort not in ['created_at', 'cook_time', 'num_of_servings']:
+            sort = 'created_at'
+        if order not in ['asc', 'desc']:
+            order = 'desc'
+        paginated_recipes = Recipe.get_all_published(page, per_page, sort, order,q)
         return recipe_pagination_schema.dump(paginated_recipes).data, HTTPStatus.OK
 
     @jwt_required
