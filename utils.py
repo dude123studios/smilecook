@@ -3,7 +3,7 @@ from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
 import uuid
 from flask_uploads import extension
-from extensions import image_set
+from extensions import image_set, cache
 from PIL import Image
 import os
 
@@ -43,3 +43,6 @@ def compress_image(filename, folder):
     image.save(compressed_filepath, optimizer=True, quality=50)
     os.remove(filepath)
     return compressed_filename
+def clear_cache(key_prefix):
+    keys = [key for key in cache.cache._cache.keys() if key.startswith(key_prefix)]
+    cache.delete_many(*keys)

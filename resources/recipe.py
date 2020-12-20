@@ -4,7 +4,7 @@ from http import HTTPStatus
 from schemas.recipe import RecipeSchema
 from models.recipe import Recipe
 from flask_jwt_extended import get_jwt_identity, jwt_required, jwt_optional
-from utils import save_image
+from utils import save_image, clear_cache
 from extensions import image_set, cache
 import os
 from schemas.pagination import RecipePaginationSchema
@@ -65,6 +65,7 @@ class RecipeCoverUploadResource(Resource):
         filename = save_image(file, 'cover_images')
         recipe.cover_image = filename
         recipe.save()
+        clear_cache('/recipes')
         return recipe_cover_schema.dump(recipe).data, HTTPStatus.OK
 
 
@@ -100,7 +101,7 @@ class RecipeResource(Resource):
         recipe.directions = data.get('directions') or recipe.directions
         recipe.ingredients = data.get('ingredients') or recipe.ingredients
         recipe.save()
-
+        clear_cache('/recipes')
         return recipe_schema.dump(recipe).data, HTTPStatus.OK
 
     @jwt_required
@@ -121,6 +122,7 @@ class RecipeResource(Resource):
         recipe.cook_time = data.get('cook_time')
         recipe.directions = data.get('directions')
         recipe.save()
+        clear_cache('/recipes')
         return recipe_schema.dump(recipe).data, HTTPStatus.OK
 
     @jwt_required
@@ -132,6 +134,7 @@ class RecipeResource(Resource):
         if current_user != recipe.user_id:
             return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
         recipe.delete()
+        clear_cache('/recipes')
         return {}, HTTPStatus.NO_CONTENT
 
 
@@ -146,6 +149,7 @@ class RecipePublicResource(Resource):
             return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
         recipe.is_public = True
         recipe.save()
+        clear_cache('/recipes')
         return recipe_schema.dump(recipe).data, HTTPStatus.OK
 
     @jwt_required
@@ -157,4 +161,5 @@ class RecipePublicResource(Resource):
             return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
         recipe.is_public = False
         recipe.save()
+        clear_cache('/recipes')
         return {}, HTTPStatus.NO_CONTENT

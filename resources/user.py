@@ -9,7 +9,7 @@ from webargs.flaskparser import use_kwargs
 from schemas.recipe import RecipeSchema
 from schemas.pagination import RecipePaginationSchema
 from models.recipe import Recipe
-from utils import verify_token, generate_token, save_image
+from utils import verify_token, generate_token, save_image, clear_cache
 from mailgun import Mailgun
 import os
 from extensions import image_set
@@ -17,7 +17,6 @@ from extensions import image_set
 user_schema = UserSchema()
 user_avatar_schema = UserSchema(only=('avatar_url',))
 user_public_schema = UserSchema(exclude=('email',))
-recipe_list_schema = RecipeSchema(many=True, exclude=('author',))
 recipe_pagination_schema= RecipePaginationSchema()
 mailgun = Mailgun(domain=os.environ.get('MAILGUN_DOMAIN'),
                   api_key=os.environ.get('MAILGUN_API_KEY'))
@@ -61,6 +60,7 @@ class UserAvatarUploadResource(Resource):
         filename = save_image(file, 'avatars')
         user.avatar_image = filename
         user.save()
+        clear_cache('/recipes')
         return user_avatar_schema.dump(user).data, HTTPStatus.OK
 class UserActivateResource(Resource):
     def get(self,token):
