@@ -5,7 +5,7 @@ from flask_uploads import configure_uploads, patch_request_class
 
 
 from config import Config
-from extensions import db, jwt, image_set
+from extensions import db, jwt, image_set, cache
 from resources.token import TokenResource, RefreshResource, RevokeResource, blacklist
 from resources.user import (UserListResource, MeResource, UserResource, UserRecipeListResource, UserActivateResource,
                             UserAvatarUploadResource)
@@ -24,6 +24,7 @@ def register_extensions(app):
     jwt.init_app(app)
     configure_uploads(app, image_set)
     patch_request_class(app, 4*1024*1024)
+    cache.init_app(app)
     @jwt.token_in_blacklist_loader
     def check_if_token_in_blacklist(decrypted_token):
         jti = decrypted_token['jti']
