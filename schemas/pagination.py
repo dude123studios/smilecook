@@ -5,29 +5,30 @@ from schemas.recipe import RecipeSchema
 class PaginationSchema(Schema):
     class Meta:
         ordered = True
-        links = fields.Method(serialize='get_pagination_links')
-        page = fields.Integer(dump_only=True)
-        pages = fields.Integer(dump_only=True)
-        per_page = fields.Integer(dump_only=True)
-        total = fields.Integer(dump_only=True)
 
-        @staticmethod
-        def get_url(page):
-            query_args = request.args.to_dict()
-            query_args['page'] = page
+    links = fields.Method(serialize='get_pagination_links')
+    page = fields.Integer(dump_only=True)
+    pages = fields.Integer(dump_only=True)
+    per_page = fields.Integer(dump_only=True)
+    total = fields.Integer(dump_only=True)
 
-            return '{}?{}'.format(request.base_url, urlencode(query_args))
+    @staticmethod
+    def get_url(page):
+        query_args = request.args.to_dict()
+        query_args['page'] = page
 
-        def get_pagination_link(self, paginated_objects):
-            paginated_links = {
-                'first':self.get_url(page=1),
-                'last':self.get_url(page=paginated_objects.pages)
-            }
-            if paginated_objects.has_prev:
-                paginated_links['prev'] = self.get_url(page=paginated_objects.prev_num)
-            if paginated_objects.has_next:
-                paginated_links['next'] = self.get_url(page=paginated_objects.next_num)
-            return paginated_links
+        return '{}?{}'.format(request.base_url, urlencode(query_args))
+
+    def get_pagination_links(self, paginated_objects):
+        paginated_links = {
+            'first':self.get_url(page=1),
+            'last':self.get_url(page=paginated_objects.pages)
+        }
+        if paginated_objects.has_prev:
+            paginated_links['prev'] = self.get_url(page=paginated_objects.prev_num)
+        if paginated_objects.has_next:
+            paginated_links['next'] = self.get_url(page=paginated_objects.next_num)
+        return paginated_links
 
 class RecipePaginationSchema(PaginationSchema):
     data = fields.Nested(RecipeSchema, attribute='items',many=True)

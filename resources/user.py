@@ -7,6 +7,7 @@ from schemas.user import UserSchema
 from webargs import fields
 from webargs.flaskparser import use_kwargs
 from schemas.recipe import RecipeSchema
+from schemas.pagination import RecipePaginationSchema
 from models.recipe import Recipe
 from utils import verify_token, generate_token, save_image
 from mailgun import Mailgun
@@ -17,6 +18,7 @@ user_schema = UserSchema()
 user_avatar_schema = UserSchema(only=('avatar_url',))
 user_public_schema = UserSchema(exclude=('email',))
 recipe_list_schema = RecipeSchema(many=True, exclude=('author',))
+recipe_pagination_schema= RecipePaginationSchema()
 mailgun = Mailgun(domain=os.environ.get('MAILGUN_DOMAIN'),
                   api_key=os.environ.get('MAILGUN_API_KEY'))
 
@@ -77,8 +79,9 @@ class UserActivateResource(Resource):
 class UserRecipeListResource(Resource):
 
     @jwt_optional
-    @use_kwargs({'visibility': fields.Str(missing='public')})
-    def get(self,username, visibility):
+    @use_kwargs({'visibility': fields.Str(missing='public'),
+                 'page':fields.Int(missing=1),'per_page':fields.Int(missing=20)})
+    def get(self,page,per_page,username, visibility):
         user = User.get_by_username(username)
         if user is None:
             return {'message':'User not found'}, HTTPStatus.NOT_FOUND
@@ -87,9 +90,9 @@ class UserRecipeListResource(Resource):
             pass
         else:
             visibility = 'public'
-        recipes = Recipe.get_all_by_user(user_id=user.id, visibility=visibility)
+        recipes = Recipe.get_all_by_user(user_id=user.id, visibility=visibility,page=page,per_page=per_page)
 
-        return recipe_list_schema.dump(recipes).data, HTTPStatus.OK
+        return recipe_pagination_schema.dump(recipes).data, HTTPStatus.OK
 
 
 class UserResource(Resource):

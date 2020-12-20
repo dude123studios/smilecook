@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_dump, validate, validates, ValidationError
 from schemas.user import UserSchema
 from flask import url_for
-from schemas.pagination import PaginationSchema
+
 
 
 def validate_num_of_servings(n):

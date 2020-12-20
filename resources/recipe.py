@@ -26,7 +26,7 @@ class RecipeListResource(Resource):
             sort = 'created_at'
         if order not in ['asc', 'desc']:
             order = 'desc'
-        paginated_recipes = Recipe.get_all_published(page, per_page, sort, order,q)
+        paginated_recipes = Recipe.get_all_published(page=page, per_page=per_page, sort=sort, order=order,q=q)
         return recipe_pagination_schema.dump(paginated_recipes).data, HTTPStatus.OK
 
     @jwt_required
