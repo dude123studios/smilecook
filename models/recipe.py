@@ -18,7 +18,7 @@ class Recipe(db.Model):
                            server_default=db.func.now(), onupdate=db.func.now())
     user_id = db.Column(db.Integer(), db.ForeignKey("user.id"))
     cover_image = db.Column(db.String(100), default=None)
-
+    ingredients = db.Column(db.String(150))
     @classmethod
     def get_all_published(cls, page, per_page, sort, order, q):
         keyword = '%{keyword}%'.format(keyword=q)
@@ -28,8 +28,8 @@ class Recipe(db.Model):
         else:
             sort_logic = desc(field)
 
-        return cls.query.filter(or_(cls.name.ilike(keyword),cls.description.ilike(keyword)),
-                                cls.is_public.is_(True)). \
+        return cls.query.filter(or_(cls.name.ilike(keyword),cls.description.ilike(keyword),
+                                    cls.ingredients.ilike(keyword)),cls.is_public.is_(True)). \
             order_by(sort_logic).paginate(page=page, per_page=per_page, max_per_page=100)
 
     @classmethod

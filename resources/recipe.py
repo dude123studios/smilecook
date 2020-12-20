@@ -97,6 +97,7 @@ class RecipeResource(Resource):
         recipe.num_of_servings = data.get('num_of_servings') or recipe.num_of_servings
         recipe.cook_time = data.get('cook_time') or recipe.cook_time
         recipe.directions = data.get('directions') or recipe.directions
+        recipe.ingredients = data.get('ingredients') or recipe.ingredients
         recipe.save()
 
         return recipe_schema.dump(recipe).data, HTTPStatus.OK
@@ -144,7 +145,7 @@ class RecipePublicResource(Resource):
             return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
         recipe.is_public = True
         recipe.save()
-        return
+        return recipe_schema.dump(recipe).data, HTTPStatus.OK
 
     @jwt_required
     def delete(self, recipe_id):

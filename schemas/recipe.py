@@ -26,6 +26,7 @@ class RecipeSchema(Schema):
     num_of_servings = fields.Integer(validate=validate_num_of_servings)
     cook_time = fields.Integer()
     cover_image = fields.Method(serialize='dump_cover_image_url')
+    ingredients = fields.String(validate=[validate.Length(max=100)])
 
     def dump_cover_image_url(self, recipe):
         if recipe.cover_image:
