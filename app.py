@@ -2,9 +2,8 @@ from flask import Flask, request
 from flask_restful import Api
 from flask_migrate import Migrate
 from flask_uploads import configure_uploads, patch_request_class
+import os
 
-
-from config import Config
 from extensions import db, jwt, image_set, cache, limiter
 from resources.token import TokenResource, RefreshResource, RevokeResource, blacklist
 from resources.user import (UserListResource, MeResource, UserResource, UserRecipeListResource, UserActivateResource,
@@ -12,8 +11,16 @@ from resources.user import (UserListResource, MeResource, UserResource, UserReci
 from resources.recipe import RecipeListResource, RecipeResource, RecipePublicResource, RecipeCoverUploadResource
 
 def create_app():
+
+    env = os.environ.get('ENV','Development')
+    if env == 'Production':
+        config_str = 'config.ProductionConfig'
+    elif env == 'Staging':
+        config_str = 'config.StagingConfig'
+    else:
+        config_str = 'config.DevelopmentConfig'
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(config_str)
 
     register_extensions(app)
     register_resources(app)

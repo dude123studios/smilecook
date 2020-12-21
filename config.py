@@ -1,10 +1,9 @@
+import os
 class Config:
-    DEBUG = True
+    DEBUG = False
 
-    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://Atharv:R0gueone@localhost/smilecook'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    SECRET_KEY = 'super-secret-key'
     JWT_ERROR_MESSAGE_KEY = 'message'
 
     JWT_BLACKLIST_ENABLED = True
@@ -16,3 +15,20 @@ class Config:
     CACHE_DEFAULT_TIMEOUT = 10 * 60
 
     RATELIMIT_HEADERS_ENABLED = True
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+
+    SECRET_KEY = 'super-secret-key'
+
+    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://Atharv:R0gueone@localhost:5432/smilecook'
+
+class ProductionConfig(Config):
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+
+class StagingConfig(Config):
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
