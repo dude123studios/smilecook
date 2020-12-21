@@ -12,7 +12,7 @@ from models.recipe import Recipe
 from utils import verify_token, generate_token, save_image, clear_cache
 from mailgun import Mailgun
 import os
-from extensions import image_set
+from extensions import image_set, limiter
 
 user_schema = UserSchema()
 user_avatar_schema = UserSchema(only=('avatar_url',))
@@ -77,7 +77,7 @@ class UserActivateResource(Resource):
         return {}, HTTPStatus.NO_CONTENT
 
 class UserRecipeListResource(Resource):
-
+    decorators = [limiter.limit('3/minute;30/hour;300/day', methods=['GET'], error_message='Too many requests')]
     @jwt_optional
     @use_kwargs({'visibility': fields.Str(missing='public'),
                  'page':fields.Int(missing=1),'per_page':fields.Int(missing=20)})
