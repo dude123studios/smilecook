@@ -5,7 +5,7 @@ from schemas.recipe import RecipeSchema
 from models.recipe import Recipe
 from flask_jwt_extended import get_jwt_identity, jwt_required, jwt_optional
 from utils import save_image, clear_cache
-from extensions import image_set, cache
+from extensions import image_set, cache, limiter
 import os
 from schemas.pagination import RecipePaginationSchema
 from webargs import fields
@@ -18,7 +18,7 @@ recipe_pagination_schema = RecipePaginationSchema()
 
 
 class RecipeListResource(Resource):
-
+    decorators = [limiter.limit('2 per minute',methods=['GET'],error_message='Too many requests')]
     @use_kwargs({'q': fields.Str(missing=''), 'page': fields.Int(missing=1), 'per_page': fields.Int(missing=20),
                  'sort': fields.Str(missing='created_at'), 'order': fields.Str(missing='desc')})
     @cache.cached(timeout=60,query_string=True)
@@ -72,6 +72,7 @@ class RecipeCoverUploadResource(Resource):
 class RecipeResource(Resource):
 
     @jwt_optional
+    @cache.cached(timeout=120, query_string=True)
     def get(self, recipe_id):
         recipe = Recipe.get_by_id(recipe_id=recipe_id)
         if recipe is None:
